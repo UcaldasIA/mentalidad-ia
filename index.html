@@ -1,0 +1,463 @@
+<!doctype html>
+<html lang="es-CO">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#6d28d9">
+<title>Asistencia · Mentalidad emprendedora con IA</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    darkMode: 'class',
+    theme: {
+      extend: {
+        fontFamily: {
+          sans: ['"Atkinson Hyperlegible"', 'system-ui', 'sans-serif'],
+          display: ['Fredoka', '"Atkinson Hyperlegible"', 'sans-serif']
+        },
+        keyframes: {
+          pop: { '0%': { transform: 'scale(.6)', opacity: 0 }, '60%': { transform: 'scale(1.08)', opacity: 1 }, '100%': { transform: 'scale(1)' } },
+          rise: { '0%': { transform: 'translateY(16px)', opacity: 0 }, '100%': { transform: 'translateY(0)', opacity: 1 } },
+          glow: { '0%,100%': { boxShadow: '0 0 0 0 rgba(245,158,11,.55)' }, '50%': { boxShadow: '0 0 0 14px rgba(245,158,11,0)' } }
+        },
+        animation: { pop: 'pop .5s ease-out both', rise: 'rise .45s ease-out both', glow: 'glow 2s ease-in-out infinite' }
+      }
+    }
+  };
+  // Tamaño de letra y tema antes de pintar (evita parpadeo)
+  (function () {
+    var t = null, f = null;
+    try { t = localStorage.getItem('asis_tema'); f = localStorage.getItem('asis_letra'); } catch (e) {}
+    if (t === 'oscuro' || (!t && window.matchMedia('(prefers-color-scheme: dark)').matches)) document.documentElement.classList.add('dark');
+    document.documentElement.style.fontSize = (f || '20') + 'px';
+  })();
+</script>
+<style>
+  body { -webkit-tap-highlight-color: transparent; }
+  .confeti { position: fixed; top: -12px; width: 12px; height: 18px; border-radius: 3px; z-index: 60; pointer-events: none;
+    animation: caer linear forwards; }
+  @keyframes caer { to { transform: translateY(110vh) rotate(720deg); opacity: .9; } }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } .confeti { display: none; } }
+  input::placeholder { letter-spacing: .05em; }
+</style>
+</head>
+
+<body class="min-h-screen font-sans text-slate-800 dark:text-slate-100 bg-gradient-to-br from-violet-50 via-white to-amber-50 dark:from-slate-950 dark:via-slate-900 dark:to-violet-950 transition-colors">
+
+  <!-- ===== CABECERA ===== -->
+  <header class="relative overflow-hidden bg-gradient-to-r from-violet-700 via-fuchsia-600 to-orange-500 text-white">
+    <div aria-hidden="true" class="absolute -top-16 -right-10 w-64 h-64 rounded-full bg-white/10"></div>
+    <div aria-hidden="true" class="absolute -bottom-24 left-1/3 w-72 h-72 rounded-full bg-white/10"></div>
+
+    <div class="relative max-w-5xl mx-auto px-4 pt-4 pb-10 sm:pb-14">
+      <!-- Barra de accesibilidad -->
+      <div class="flex flex-wrap items-center justify-end gap-2" role="toolbar" aria-label="Opciones de lectura">
+        <span class="text-sm font-bold mr-1 hidden sm:inline">Tamaño de letra:</span>
+        <div class="flex rounded-2xl bg-white/20 p-1 backdrop-blur">
+          <button data-letra="17" class="btn-letra px-3 py-1.5 rounded-xl font-bold text-sm" aria-label="Letra normal">A</button>
+          <button data-letra="20" class="btn-letra px-3 py-1.5 rounded-xl font-bold text-base" aria-label="Letra grande">A+</button>
+          <button data-letra="24" class="btn-letra px-3 py-1.5 rounded-xl font-bold text-lg" aria-label="Letra muy grande">A++</button>
+        </div>
+        <button id="btnTema" class="flex items-center gap-2 rounded-2xl bg-white/20 px-3 py-2 font-bold text-sm backdrop-blur hover:bg-white/30" aria-label="Cambiar entre modo claro y oscuro">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 12.8A9 9 0 1111.2 3a7 7 0 009.8 9.8z"/></svg>
+          <span id="txtTema">Modo oscuro</span>
+        </button>
+      </div>
+
+      <div class="mt-6 flex items-center gap-4 sm:gap-6">
+        <div class="shrink-0 grid place-items-center w-16 h-16 sm:w-20 sm:h-20 rounded-3xl bg-white text-violet-700 shadow-xl rotate-[-6deg]">
+          <svg class="w-10 h-10 sm:w-12 sm:h-12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 18h6M10 21h4M12 3a6 6 0 00-3.6 10.8c.6.5 1 1.2 1 2V16h5.2v-.2c0-.8.4-1.5 1-2A6 6 0 0012 3z"/>
+            <path stroke-linecap="round" d="M12 7v3m-1.5 1.5L12 10l1.5 1.5"/>
+          </svg>
+        </div>
+        <div>
+          <p class="uppercase tracking-widest text-sm font-bold text-white/85">Registro de asistencia</p>
+          <h1 id="curso" class="font-display font-semibold text-2xl sm:text-4xl leading-tight drop-shadow">Mentalidad emprendedora en la era de la inteligencia artificial</h1>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-5xl mx-auto px-4 -mt-6 sm:-mt-8 pb-16 relative">
+
+    <!-- ===== INGRESO ===== -->
+    <section id="acceso" class="max-w-xl mx-auto animate-rise">
+      <div class="rounded-[2rem] bg-white dark:bg-slate-800 shadow-2xl shadow-violet-900/10 ring-1 ring-violet-100 dark:ring-slate-700 p-6 sm:p-10">
+        <h2 class="font-display font-semibold text-3xl text-violet-800 dark:text-violet-300">¡Bienvenido!</h2>
+        <p class="mt-2 text-lg text-slate-600 dark:text-slate-300">Escriba sus datos para ver sus clases y marcar su asistencia.</p>
+
+        <form id="formAcceso" class="mt-8 space-y-7" autocomplete="off" novalidate>
+          <div>
+            <label for="cedula" class="flex items-center gap-3 text-xl font-bold">
+              <span class="grid place-items-center w-10 h-10 rounded-full bg-violet-600 text-white font-display text-lg">1</span>
+              Su número de cédula
+            </label>
+            <input id="cedula" inputmode="numeric" pattern="[0-9]*" maxlength="12" required
+              placeholder="Ej: 1053456789"
+              class="mt-3 w-full rounded-2xl border-2 border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 px-5 py-4 text-2xl sm:text-3xl font-bold tracking-wider focus:border-violet-600 focus:ring-4 focus:ring-violet-200 dark:focus:ring-violet-900 outline-none transition">
+            <p class="mt-2 text-base text-slate-500 dark:text-slate-400">Solo números, sin puntos ni espacios.</p>
+          </div>
+
+          <div>
+            <label for="verif" class="flex items-center gap-3 text-xl font-bold">
+              <span class="grid place-items-center w-10 h-10 rounded-full bg-orange-500 text-white font-display text-lg">2</span>
+              Los últimos 4 números de su celular
+            </label>
+            <input id="verif" inputmode="numeric" pattern="[0-9]*" maxlength="4" required placeholder="• • • •"
+              class="mt-3 w-full sm:w-64 rounded-2xl border-2 border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-900 px-5 py-4 text-3xl font-bold tracking-[.5em] text-center focus:border-orange-500 focus:ring-4 focus:ring-orange-200 dark:focus:ring-orange-900 outline-none transition">
+            <p class="mt-2 text-base text-slate-500 dark:text-slate-400">Ejemplo: si su celular es 310 456 <b>7890</b>, escriba <b>7890</b>.</p>
+          </div>
+
+          <button id="btnConsultar" type="submit"
+            class="w-full min-h-[4rem] rounded-2xl bg-gradient-to-r from-violet-600 to-fuchsia-600 hover:from-violet-700 hover:to-fuchsia-700 text-white text-2xl font-display font-semibold shadow-lg shadow-violet-500/30 active:scale-[.98] transition disabled:opacity-60 disabled:cursor-wait flex items-center justify-center gap-3">
+            <span id="txtConsultar">Ingresar</span>
+            <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14m-6-6 6 6-6 6"/></svg>
+          </button>
+        </form>
+
+        <div id="msgAcceso" role="alert" class="hidden mt-6 rounded-2xl border-2 border-rose-300 bg-rose-50 dark:bg-rose-950/60 dark:border-rose-800 text-rose-800 dark:text-rose-200 p-4 text-lg font-bold"></div>
+      </div>
+
+      <p class="mt-6 text-center text-base text-slate-500 dark:text-slate-400">¿Problemas para ingresar? Comuníquese con su docente.</p>
+    </section>
+
+    <!-- ===== PANEL ===== -->
+    <section id="panel" class="hidden space-y-6">
+
+      <!-- Saludo y datos -->
+      <div class="rounded-[2rem] bg-white dark:bg-slate-800 shadow-2xl shadow-violet-900/10 ring-1 ring-violet-100 dark:ring-slate-700 p-6 sm:p-8 animate-rise">
+        <div class="flex flex-wrap items-start justify-between gap-4">
+          <div class="flex items-center gap-4">
+            <div id="avatar" class="grid place-items-center w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gradient-to-br from-violet-600 to-orange-500 text-white font-display text-3xl font-semibold shadow-lg"></div>
+            <div>
+              <p class="text-lg text-slate-500 dark:text-slate-400">¡Hola!</p>
+              <h2 id="saludo" class="font-display font-semibold text-3xl sm:text-4xl leading-tight"></h2>
+            </div>
+          </div>
+          <button id="btnSalir" type="button"
+            class="flex items-center gap-2 rounded-2xl border-2 border-slate-300 dark:border-slate-600 px-5 py-3 text-lg font-bold hover:bg-slate-100 dark:hover:bg-slate-700 transition">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17l5-5-5-5M20 12H9M12 21H5a2 2 0 01-2-2V5a2 2 0 012-2h7"/></svg>
+            Salir
+          </button>
+        </div>
+
+        <dl class="mt-7 grid gap-4 sm:grid-cols-2">
+          <div class="rounded-2xl bg-violet-50 dark:bg-violet-950/50 p-4 sm:col-span-2">
+            <dt class="text-base font-bold text-violet-700 dark:text-violet-300">Nombre completo</dt>
+            <dd id="dNom" class="mt-1 text-2xl font-bold break-words"></dd>
+          </div>
+          <div class="rounded-2xl bg-fuchsia-50 dark:bg-fuchsia-950/40 p-4">
+            <dt class="text-base font-bold text-fuchsia-700 dark:text-fuchsia-300">Cédula</dt>
+            <dd id="dCed" class="mt-1 text-2xl font-bold tracking-wide"></dd>
+          </div>
+          <div class="rounded-2xl bg-orange-50 dark:bg-orange-950/40 p-4">
+            <dt class="text-base font-bold text-orange-700 dark:text-orange-300">Celular</dt>
+            <dd id="dTel" class="mt-1 text-2xl font-bold tracking-wide"></dd>
+          </div>
+          <div class="rounded-2xl bg-sky-50 dark:bg-sky-950/40 p-4 sm:col-span-2">
+            <dt class="text-base font-bold text-sky-700 dark:text-sky-300">Correo electrónico</dt>
+            <dd id="dCor" class="mt-1 text-xl sm:text-2xl font-bold break-all"></dd>
+          </div>
+        </dl>
+        <p class="mt-4 text-base text-slate-500 dark:text-slate-400">Si algún dato está mal, avísele a su docente para corregirlo.</p>
+      </div>
+
+      <!-- Sesión habilitada -->
+      <div id="banner" class="animate-rise"></div>
+      <div id="msgPanel" role="alert" class="hidden rounded-2xl border-2 p-4 text-lg font-bold"></div>
+
+      <!-- Progreso -->
+      <div class="rounded-[2rem] bg-white dark:bg-slate-800 shadow-xl ring-1 ring-violet-100 dark:ring-slate-700 p-6 sm:p-8 flex flex-col sm:flex-row items-center gap-6 sm:gap-10 animate-rise">
+        <div class="relative w-44 h-44 shrink-0">
+          <svg viewBox="0 0 120 120" class="w-full h-full -rotate-90" aria-hidden="true">
+            <defs>
+              <linearGradient id="grad" x1="0" x2="1" y1="0" y2="1">
+                <stop offset="0%" stop-color="#7c3aed"/><stop offset="100%" stop-color="#f97316"/>
+              </linearGradient>
+            </defs>
+            <circle cx="60" cy="60" r="50" fill="none" class="stroke-slate-200 dark:stroke-slate-700" stroke-width="14"/>
+            <circle id="anillo" cx="60" cy="60" r="50" fill="none" stroke="url(#grad)" stroke-width="14" stroke-linecap="round"
+              stroke-dasharray="314.16" stroke-dashoffset="314.16" style="transition: stroke-dashoffset 1.2s ease"/>
+          </svg>
+          <div class="absolute inset-0 grid place-items-center text-center">
+            <div><span id="pct" class="font-display font-semibold text-5xl">0%</span><br><span class="text-sm font-bold text-slate-500 dark:text-slate-400">asistencia</span></div>
+          </div>
+        </div>
+        <div class="text-center sm:text-left">
+          <h3 class="font-display font-semibold text-2xl">Su avance en el curso</h3>
+          <p class="mt-2 text-xl">Ha asistido a <b id="nAsis" class="text-violet-700 dark:text-violet-300 text-3xl">0</b> de <b id="nDict" class="text-3xl">0</b> sesiones realizadas.</p>
+          <p id="txtTotal" class="mt-1 text-lg text-slate-500 dark:text-slate-400"></p>
+          <p id="txtAnimo" class="mt-3 inline-block rounded-full bg-amber-100 dark:bg-amber-900/50 text-amber-900 dark:text-amber-200 px-4 py-1.5 font-bold"></p>
+        </div>
+      </div>
+
+      <!-- Sesiones -->
+      <div>
+        <h3 class="font-display font-semibold text-2xl sm:text-3xl mb-4 px-1">Sus sesiones</h3>
+        <ul id="lista" class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"></ul>
+      </div>
+    </section>
+
+    <footer class="mt-12 text-center text-base text-slate-500 dark:text-slate-400 max-w-2xl mx-auto">
+      Sus datos personales se tratan conforme a la Ley 1581 de 2012 y se usan solo para el control de asistencia del curso.
+      Por seguridad, su sesión se cierra sola después de 5 minutos sin uso.
+    </footer>
+  </main>
+
+  <!-- Celebración -->
+  <div id="celebra" class="hidden fixed inset-0 z-50 grid place-items-center bg-slate-900/60 backdrop-blur-sm p-4" role="dialog" aria-modal="true" aria-labelledby="celTitulo">
+    <div class="animate-pop w-full max-w-md rounded-[2rem] bg-white dark:bg-slate-800 p-8 text-center shadow-2xl">
+      <div class="mx-auto grid place-items-center w-28 h-28 rounded-full bg-emerald-500 text-white shadow-lg shadow-emerald-500/40">
+        <svg class="w-16 h-16" fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+      </div>
+      <h2 id="celTitulo" class="mt-6 font-display font-semibold text-4xl text-emerald-700 dark:text-emerald-300">¡Listo!</h2>
+      <p id="celTexto" class="mt-3 text-xl"></p>
+      <button id="btnCerrarCel" class="mt-8 w-full min-h-[4rem] rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white text-2xl font-display font-semibold">Aceptar</button>
+    </div>
+  </div>
+
+<script>
+  /* ====== CONFIGURACIÓN: pegue aquí la URL de la aplicación web (termina en /exec) ====== */
+  const API_URL = 'https://script.google.com/macros/s/AKfycbw2Fcp52Ys8OS6fMDLsT6BSI9zrTtn9uGZTOe8rmZuYofqFAAGXyS7UTp8b0jPV-9RjGg/exec';
+  const CURSO = 'Mentalidad emprendedora en la era de la inteligencia artificial';
+  const MINUTOS_INACTIVIDAD = 5;
+  /* ======================================================================================= */
+
+  const $ = id => document.getElementById(id);
+  let cred = null, temporizador = null, sesionAbierta = null;
+
+  const ICONO = {
+    check: '<path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>',
+    x: '<path stroke-linecap="round" d="M6 6l12 12M18 6L6 18"/>',
+    minus: '<path stroke-linecap="round" d="M6 12h12"/>',
+    info: '<circle cx="12" cy="12" r="9"/><path stroke-linecap="round" d="M12 11v5M12 8h.01"/>',
+    bell: '<path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.4-1.4A2 2 0 0118 14.2V11a6 6 0 10-12 0v3.2a2 2 0 01-.6 1.4L4 17h5m6 0a3 3 0 11-6 0"/>',
+    cal: '<rect x="3" y="5" width="18" height="16" rx="2"/><path stroke-linecap="round" d="M3 10h18M8 3v4M16 3v4"/>',
+    clock: '<circle cx="12" cy="12" r="9"/><path stroke-linecap="round" d="M12 7v5l3 2"/>'
+  };
+  const ESTADO = {
+    asistio:      { txt: 'Asistió',           icon: 'check', pill: 'bg-emerald-600 text-white', borde: 'border-emerald-500', num: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200' },
+    ausente:      { txt: 'Falta injustificada', icon: 'x',   pill: 'bg-rose-600 text-white',    borde: 'border-rose-500',    num: 'bg-rose-100 text-rose-800 dark:bg-rose-900 dark:text-rose-200' },
+    sinregistro:  { txt: 'Sin registro',      icon: 'minus', pill: 'bg-slate-500 text-white',   borde: 'border-slate-300 dark:border-slate-600', num: 'bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-200' },
+    novedad:      { txt: 'Novedad',           icon: 'info',  pill: 'bg-sky-600 text-white',     borde: 'border-sky-500',     num: 'bg-sky-100 text-sky-800 dark:bg-sky-900 dark:text-sky-200' },
+    abierta:      { txt: '¡Abierta ahora!',   icon: 'bell',  pill: 'bg-amber-500 text-slate-900', borde: 'border-amber-400', num: 'bg-amber-100 text-amber-900 dark:bg-amber-900 dark:text-amber-100' },
+    programada:   { txt: 'Próxima',           icon: 'cal',   pill: 'bg-violet-600 text-white',  borde: 'border-violet-400',  num: 'bg-violet-100 text-violet-800 dark:bg-violet-900 dark:text-violet-200' },
+    porprogramar: { txt: 'Fecha por definir', icon: 'clock', pill: 'bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-200', borde: 'border-slate-200 dark:border-slate-700', num: 'bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300' }
+  };
+  const svg = (k, cls) => '<svg class="' + (cls || 'w-6 h-6') + '" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24" aria-hidden="true">' + ICONO[k] + '</svg>';
+
+  /* ---------- Accesibilidad: letra y tema ---------- */
+  function guardar(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+  function marcarLetra() {
+    const actual = document.documentElement.style.fontSize.replace('px', '');
+    document.querySelectorAll('.btn-letra').forEach(b => {
+      const on = b.dataset.letra === actual;
+      b.classList.toggle('bg-white', on); b.classList.toggle('text-violet-700', on);
+      b.setAttribute('aria-pressed', on);
+    });
+  }
+  document.querySelectorAll('.btn-letra').forEach(b => b.addEventListener('click', () => {
+    document.documentElement.style.fontSize = b.dataset.letra + 'px';
+    guardar('asis_letra', b.dataset.letra); marcarLetra();
+  }));
+  function marcarTema() { $('txtTema').textContent = document.documentElement.classList.contains('dark') ? 'Modo claro' : 'Modo oscuro'; }
+  $('btnTema').addEventListener('click', () => {
+    const dark = document.documentElement.classList.toggle('dark');
+    guardar('asis_tema', dark ? 'oscuro' : 'claro'); marcarTema();
+  });
+  marcarLetra(); marcarTema();
+  $('curso').textContent = CURSO;
+
+  /* ---------- Utilidades ---------- */
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const fmtCed = c => String(c || '').replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  const fmtTel = t => { t = String(t || ''); return t.length === 10 ? t.slice(0, 3) + ' ' + t.slice(3, 6) + ' ' + t.slice(6) : (t || 'No registrado'); };
+  function fechaLarga(iso) {
+    if (!iso) return 'Fecha por definir';
+    const [a, m, d] = iso.split('-').map(Number);
+    const s = new Date(a, m - 1, d, 12).toLocaleDateString('es-CO', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    return s.charAt(0).toUpperCase() + s.slice(1);
+  }
+  function mostrar(el, texto, tipo) {
+    el.textContent = texto;
+    el.classList.toggle('hidden', !texto);
+    if (tipo) {
+      el.className = 'rounded-2xl border-2 p-4 text-lg font-bold ' + (tipo === 'ok'
+        ? 'border-emerald-300 bg-emerald-50 text-emerald-800 dark:bg-emerald-950/60 dark:border-emerald-800 dark:text-emerald-200'
+        : 'border-rose-300 bg-rose-50 text-rose-800 dark:bg-rose-950/60 dark:border-rose-800 dark:text-rose-200') + (texto ? '' : ' hidden');
+    }
+  }
+
+  ['cedula', 'verif'].forEach(id => $(id).addEventListener('input', e => { e.target.value = e.target.value.replace(/\D/g, ''); }));
+
+  async function llamar(payload) {
+    const r = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(payload)
+    });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    return r.json();
+  }
+
+  /* ---------- Ingreso ---------- */
+  $('formAcceso').addEventListener('submit', async e => {
+    e.preventDefault();
+    const cedula = $('cedula').value, verificacion = $('verif').value;
+    if (cedula.length < 5) { mostrar($('msgAcceso'), 'Escriba su número de cédula completo.'); return $('cedula').focus(); }
+    if (verificacion.length !== 4) { mostrar($('msgAcceso'), 'Escriba los últimos 4 números de su celular.'); return $('verif').focus(); }
+
+    const btn = $('btnConsultar');
+    btn.disabled = true; $('txtConsultar').textContent = 'Buscando sus datos…';
+    mostrar($('msgAcceso'), '');
+    try {
+      const r = await llamar({ accion: 'consultar', cedula, verificacion });
+      if (!r.ok) return mostrar($('msgAcceso'), r.error);
+      cred = { cedula, verificacion };
+      pintar(r);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch (err) {
+      mostrar($('msgAcceso'), 'No fue posible conectarse. Revise su internet e intente de nuevo.');
+    } finally {
+      btn.disabled = false; $('txtConsultar').textContent = 'Ingresar';
+    }
+  });
+
+  /* ---------- Panel ---------- */
+  function pintar(r) {
+    const p = r.participante;
+    const primerNombre = (p.nombre || 'Participante').split(' ')[0];
+    $('saludo').textContent = primerNombre;
+    $('avatar').textContent = primerNombre.charAt(0);
+    $('dNom').textContent = p.nombre;
+    $('dCed').textContent = fmtCed(p.cedula);
+    $('dTel').textContent = fmtTel(p.telefono);
+    $('dCor').textContent = p.correo || 'No registrado';
+
+    // Sesión habilitada
+    const b = $('banner');
+    sesionAbierta = r.activa;
+    if (r.activa && !r.activa.marcada && !r.activa.novedad) {
+      b.innerHTML =
+        '<div class="rounded-[2rem] bg-gradient-to-br from-amber-300 via-orange-400 to-fuchsia-500 p-1 shadow-2xl animate-glow">' +
+          '<div class="rounded-[1.8rem] bg-white dark:bg-slate-900 p-6 sm:p-8 flex flex-col md:flex-row md:items-center gap-6">' +
+            '<div class="flex-1">' +
+              '<p class="inline-flex items-center gap-2 rounded-full bg-amber-100 dark:bg-amber-900/60 text-amber-900 dark:text-amber-100 px-4 py-1.5 font-bold">' + svg('bell', 'w-5 h-5') + ' Asistencia abierta · ' + esc(r.activa.horario) + '</p>' +
+              '<h3 class="mt-3 font-display font-semibold text-3xl sm:text-4xl">' + esc(r.activa.id) + '</h3>' +
+              (r.activa.tema ? '<p class="mt-1 text-xl text-slate-600 dark:text-slate-300">' + esc(r.activa.tema) + '</p>' : '') +
+            '</div>' +
+            '<button id="btnMarcar" type="button" class="w-full md:w-auto min-h-[4.5rem] px-8 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white text-2xl font-display font-semibold shadow-lg shadow-emerald-600/30 active:scale-[.98] transition flex items-center justify-center gap-3">' +
+              svg('check', 'w-8 h-8') + '<span id="txtMarcar">Marcar mi asistencia</span></button>' +
+          '</div></div>';
+      $('btnMarcar').addEventListener('click', marcar);
+    } else if (r.activa && r.activa.marcada) {
+      b.innerHTML = '<div class="rounded-[2rem] bg-emerald-50 dark:bg-emerald-950/50 ring-2 ring-emerald-400 p-6 sm:p-8 flex items-center gap-5">' +
+        '<div class="grid place-items-center w-16 h-16 shrink-0 rounded-full bg-emerald-600 text-white">' + svg('check', 'w-9 h-9') + '</div>' +
+        '<div><h3 class="font-display font-semibold text-2xl sm:text-3xl text-emerald-800 dark:text-emerald-200">Su asistencia de hoy ya quedó registrada</h3>' +
+        '<p class="mt-1 text-xl">' + esc(r.activa.id) + (r.activa.tema ? ' · ' + esc(r.activa.tema) : '') + '</p></div></div>';
+    } else if (r.activa && r.activa.novedad) {
+      b.innerHTML = '<div class="rounded-[2rem] bg-sky-50 dark:bg-sky-950/50 ring-2 ring-sky-400 p-6 sm:p-8 text-xl">' +
+        '<b>' + esc(r.activa.id) + ':</b> el docente registró <b>' + esc(r.activa.novedad) + '</b>. Si es un error, comuníquese con él.</div>';
+    } else {
+      b.innerHTML = '<div class="rounded-[2rem] border-2 border-dashed border-violet-300 dark:border-violet-700 bg-white/60 dark:bg-slate-800/60 p-6 sm:p-8 flex items-center gap-5">' +
+        '<div class="grid place-items-center w-16 h-16 shrink-0 rounded-full bg-violet-100 dark:bg-violet-900 text-violet-700 dark:text-violet-200">' + svg('clock', 'w-9 h-9') + '</div>' +
+        '<p class="text-xl">En este momento no hay asistencia abierta. <span class="text-slate-500 dark:text-slate-400">Podrá marcarla durante el horario de cada clase.</span></p></div>';
+    }
+
+    // Progreso
+    const { asistidas, dictadas, total } = r.resumen;
+    const pct = dictadas ? Math.round(asistidas / dictadas * 100) : 0;
+    $('pct').textContent = pct + '%';
+    $('nAsis').textContent = asistidas; $('nDict').textContent = dictadas;
+    $('txtTotal').textContent = 'El curso tiene ' + total + ' sesiones en total.';
+    $('txtAnimo').textContent = !dictadas ? '¡Bienvenido al curso!' : pct >= 80 ? '¡Excelente compromiso! 🌟' : pct >= 60 ? '¡Va muy bien, siga así! 💪' : '¡Lo esperamos en la próxima clase! 🤝';
+    requestAnimationFrame(() => { $('anillo').style.strokeDashoffset = String(314.16 * (1 - pct / 100)); });
+
+    // Sesiones
+    $('lista').innerHTML = r.sesiones.map((s, i) => {
+      const e = ESTADO[s.estado] || ESTADO.programada;
+      const etiqueta = s.estado === 'novedad' ? s.detalle : e.txt;
+      const n = (s.id.match(/\d+/) || [i + 1])[0];
+      return '<li class="animate-rise min-w-0 rounded-3xl bg-white dark:bg-slate-800 border-l-8 ' + e.borde + ' shadow-md p-5 flex flex-col gap-3" style="animation-delay:' + (i * 40) + 'ms">' +
+        '<div class="flex items-center gap-3">' +
+          '<span class="grid place-items-center w-12 h-12 shrink-0 rounded-2xl font-display font-semibold text-2xl ' + e.num + '">' + esc(n) + '</span>' +
+          '<div class="min-w-0"><p class="font-display font-semibold text-xl">' + esc(s.id) + '</p>' +
+          (s.tema ? '<p class="text-base text-slate-600 dark:text-slate-300">' + esc(s.tema) + '</p>' : '') + '</div>' +
+        '</div>' +
+        '<p class="text-base text-slate-600 dark:text-slate-300">' + fechaLarga(s.fecha) + (s.horario ? '<br>' + esc(s.horario) : '') + '</p>' +
+        '<span class="self-start inline-flex items-center gap-2 rounded-full px-4 py-1.5 font-bold text-base ' + e.pill + '">' + svg(e.icon, 'w-5 h-5') + esc(etiqueta) + '</span>' +
+      '</li>';
+    }).join('') || '<li class="text-xl text-slate-500">Aún no hay sesiones programadas.</li>';
+
+    $('acceso').classList.add('hidden');
+    $('panel').classList.remove('hidden');
+    reiniciarTemporizador();
+  }
+
+  /* ---------- Marcar asistencia ---------- */
+  async function marcar() {
+    const btn = $('btnMarcar');
+    btn.disabled = true; $('txtMarcar').textContent = 'Registrando…';
+    mostrar($('msgPanel'), '', 'ok');
+    try {
+      const r = await llamar({ accion: 'marcar', ...cred, sesionId: sesionAbierta && sesionAbierta.id });
+      if (!r.ok) {
+        mostrar($('msgPanel'), r.error, 'err');
+        btn.disabled = false; $('txtMarcar').textContent = 'Marcar mi asistencia';
+        return;
+      }
+      celebrar(r.mensaje);
+      const datos = await llamar({ accion: 'consultar', ...cred });
+      if (datos.ok) pintar(datos);
+    } catch (err) {
+      mostrar($('msgPanel'), 'No fue posible registrar la asistencia. Intente de nuevo.', 'err');
+      btn.disabled = false; $('txtMarcar').textContent = 'Marcar mi asistencia';
+    }
+  }
+
+  function celebrar(texto) {
+    $('celTexto').textContent = texto;
+    $('celebra').classList.remove('hidden');
+    $('btnCerrarCel').focus();
+    const colores = ['#7c3aed', '#c026d3', '#f97316', '#facc15', '#10b981', '#0ea5e9'];
+    for (let i = 0; i < 70; i++) {
+      const c = document.createElement('span');
+      c.className = 'confeti';
+      c.style.left = Math.random() * 100 + 'vw';
+      c.style.background = colores[i % colores.length];
+      c.style.animationDuration = (2 + Math.random() * 2) + 's';
+      c.style.animationDelay = (Math.random() * .6) + 's';
+      document.body.appendChild(c);
+      setTimeout(() => c.remove(), 5000);
+    }
+  }
+  $('btnCerrarCel').addEventListener('click', () => $('celebra').classList.add('hidden'));
+
+  /* ---------- Salida y seguridad ---------- */
+  function cerrar() {
+    cred = null; sesionAbierta = null;
+    clearTimeout(temporizador);
+    $('cedula').value = ''; $('verif').value = '';
+    ['dNom', 'dCed', 'dTel', 'dCor', 'saludo'].forEach(id => { $(id).textContent = ''; });
+    $('lista').innerHTML = ''; $('banner').innerHTML = '';
+    mostrar($('msgPanel'), '', 'ok');
+    $('celebra').classList.add('hidden');
+    $('panel').classList.add('hidden');
+    $('acceso').classList.remove('hidden');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+  function reiniciarTemporizador() {
+    clearTimeout(temporizador);
+    if (cred) temporizador = setTimeout(cerrar, MINUTOS_INACTIVIDAD * 60 * 1000);
+  }
+  ['click', 'keydown', 'touchstart', 'scroll'].forEach(ev => document.addEventListener(ev, reiniciarTemporizador, { passive: true }));
+  $('btnSalir').addEventListener('click', cerrar);
+</script>
+</body>
+</html>
